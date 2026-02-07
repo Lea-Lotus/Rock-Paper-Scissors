@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>包剪揼小遊戲</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e5e7eb;
+    }
+
+    .game {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 16px;
+      padding: 20px 16px 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 12px;
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+
+    .score-box {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    .score-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+
+    .score-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .arena {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, #1d263b, #020617);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .player,
+    .computer {
+      flex: 1;
+      text-align: center;
+    }
+
+    .name {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .hand {
+      font-size: 2.3rem;
+      height: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vs {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      padding: 0 6px;
+    }
+
+    .result {
+      text-align: center;
+      margin-bottom: 16px;
+      min-height: 1.4em;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .result.win {
+      color: #22c55e;
+    }
+
+    .result.lose {
+      color: #f97316;
+    }
+
+    .result.tie {
+      color: #e5e7eb;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .choice-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 999px;
+      border: none;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: #e5e7eb;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease,
+        background 0.12s ease, border-color 0.12s ease;
+      touch-action: manipulation;
+    }
+
+    .choice-btn:active {
+      transform: scale(0.9);
+      background: #111827;
+      box-shadow: 0 0 0 2px rgba(248, 250, 252, 0.1);
+    }
+
+    .choice-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-reset {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.75rem;
+      cursor: pointer;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fecaca;
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      touch-action: manipulation;
+    }
+
+    .btn-reset:active {
+      transform: scale(0.95);
+    }
+
+    .tip {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-align: right;
+    }
+
+    .hand.animate {
+      animation: shake 0.5s ease-in-out 2;
+    }
+
+    @keyframes shake {
+      0% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-4px);
+      }
+      50% {
+        transform: translateX(4px);
+      }
+      75% {
+        transform: translateX(-2px);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .choice-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+      }
+      .title {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <div class="title">包剪揼</div>
+    <div class="subtitle">同電腦對戰 · 記錄勝負次數</div>
+
+    <div class="score-board">
+      <div class="score-box">
+        <div class="score-label">你贏</div>
+        <div class="score-value" id="wins">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">電腦贏</div>
+        <div class="score-value" id="losses">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">平手</div>
+        <div class="score-value" id="ties">0</div>
+      </div>
+    </div>
+
+    <div class="arena">
+      <div class="player">
+        <div class="name">你</div>
+        <div class="hand" id="player-hand">❔</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="computer">
+        <div class="name">電腦</div>
+        <div class="hand" id="computer-hand">❔</div>
+      </div>
+    </div>
+
+    <div class="result" id="result-text"></div>
+
+    <div class="buttons">
+      <div>
+        <button class="choice-btn" data-move="rock">✊</button>
+        <div class="choice-label">揼</div>
+      </div>
+      <div>
+        <button class="choice-btn" data-move="paper">✋</button>
+        <div class="choice-label">包</div>
+      </div>
+      <div>
+        <button class="choice-btn" data-move="scissors">✌️</button>
+        <div class="choice-label">剪</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-reset" id="reset-btn">重設紀錄</button>
+      <div class="tip">小提示：點擊表情出拳</div>
+    </div>
+  </div>
+
+  <script>
+    const scoreKey = "rps-score-v1";
+
+    let score =
+      JSON.parse(localStorage.getItem(scoreKey)) || {
+        wins: 0,
+        losses: 0,
+        ties: 0,
+      };
+
+    const winsEl = document.getElementById("wins");
+    const lossesEl = document.getElementById("losses");
+    const tiesEl = document.getElementById("ties");
+    const resultTextEl = document.getElementById("result-text");
+    const playerHandEl = document.getElementById("player-hand");
+    const computerHandEl = document.getElementById("computer-hand");
+    const resetBtn = document.getElementById("reset-btn");
+    const buttons = document.querySelectorAll(".choice-btn");
+
+    function updateScoreUI() {
+      winsEl.textContent = score.wins;
+      lossesEl.textContent = score.losses;
+      tiesEl.textContent = score.ties;
+    }
+
+    updateScoreUI();
+
+    function moveToEmoji(move) {
+      if (move === "rock") return "✊";
+      if (move === "paper") return "✋";
+      return "✌️";
+    }
+
+    function randomComputerMove() {
+      const n = Math.random();
+      if (n < 1 / 3) return "rock";
+      if (n < 2 / 3) return "paper";
+      return "scissors";
+    }
+
+    function getResult(player, computer) {
+      if (player === computer) return "tie";
+      if (
+        (player === "rock" && computer === "scissors") ||
+        (player === "paper" && computer === "rock") ||
+        (player === "scissors" && computer === "paper")
+      ) {
+        return "win";
+      }
+      return "lose";
+    }
+
+    function playRound(playerMove) {
+      const computerMove = randomComputerMove();
+      const result = getResult(playerMove, computerMove);
+
+      playerHandEl.textContent = moveToEmoji(playerMove);
+      computerHandEl.textContent = moveToEmoji(computerMove);
+
+      playerHandEl.classList.remove("animate");
+      computerHandEl.classList.remove("animate");
+      void playerHandEl.offsetWidth;
+      void computerHandEl.offsetWidth;
+      playerHandEl.classList.add("animate");
+      computerHandEl.classList.add("animate");
+
+      resultTextEl.classList.remove("win", "lose", "tie");
+      if (result === "win") {
+        resultTextEl.textContent = "你贏啦！🎉";
+        resultTextEl.classList.add("win");
+        score.wins++;
+      } else if (result === "lose") {
+        resultTextEl.textContent = "電腦贏咗 😈";
+        resultTextEl.classList.add("lose");
+        score.losses++;
+      } else {
+        resultTextEl.textContent = "平手～再嚟一局！";
+        resultTextEl.classList.add("tie");
+        score.ties++;
+      }
+
+      localStorage.setItem(scoreKey, JSON.stringify(score));
+      updateScoreUI();
+    }
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const move = btn.getAttribute("data-move");
+        playRound(move);
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      score = { wins: 0, losses: 0, ties: 0 };
+      localStorage.removeItem(scoreKey);
+      updateScoreUI();
+      resultTextEl.textContent = "";
+      playerHandEl.textContent = "❔";
+      computerHandEl.textContent = "❔";
+      resultTextEl.classList.remove("win", "lose", "tie");
+    });
+  </script>
+</body>
+</html>
